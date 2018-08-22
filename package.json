@@ -1,0 +1,29 @@
+{
+  "name": "SteamClientData",
+  "version": "0.0.1",
+  "description": "Attempt to install Steam client on a CI for easier updates to the Steam-Data project",
+  "homepage": "https://github.com/l3laze/SteamClientData#readme",
+  "author": "Tom Shaver <l3l_aze@yahoo.com>",
+  "license": "MIT",
+  "main": "src/index.js",
+  "files": [
+    "src/index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+github.com/l3laze/SteamClientData.git"
+  },
+  "bugs": {
+    "url": "https://github.com/l3laze/SteamClientData/issues"
+  },
+  "devDependencies": {
+    "standard": "^11.0.1"
+  },
+  "dependencies": {
+    "node-fetch": "^2.1.2"
+  },
+  "scripts": {
+    "lint": "yarn standard",
+    "test": "node tests/test.js"
+  } 
+}
