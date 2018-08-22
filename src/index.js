@@ -83,9 +83,10 @@ async function doInstall () {
       break
   }
 
-  console.log(status)
+  console.log(child1.status)
   console.log(child1.stdout)
   console.log(child1.stderr)
+  child2 && console.log(child2.status)
   child2 && console.log(child2.stdout)
   child2 && console.log(child2.stderr)
   console.log(readdirSync(
