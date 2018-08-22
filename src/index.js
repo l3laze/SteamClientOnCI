@@ -86,7 +86,7 @@ async function doInstall () {
       child2 = await spawnAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`)
       break
   }
-  
+
   console.log(child1.pid + ' is garbage!')
   child2 && console.log(child2.pid + ' is garbage!')
 
