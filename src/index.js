@@ -91,7 +91,9 @@ async function doInstall () {
 
     case 'win32':
       child1 = spawnSync(`${filePath}`, [ '/S' ])
-      child2 = await spawnAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`, [], {})
+      child2 = await spawnAsync(platforms[ plat ].executable, [], {
+        cwd: platforms[ plat ].location[ arch ]
+      })
       break
   }
 
