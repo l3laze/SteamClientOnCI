@@ -65,7 +65,7 @@ function afterInstall () {
 async function doInstall () {
   const filePath = await getInstaller()
   const spawnSync = require('child_process').spawnSync
-  const spawnAsync = require('util').promisify(require('child_process').spawn)
+  // const spawnAsync = require('util').promisify(require('child_process').spawn)
   let child1
   let child2
 
@@ -91,7 +91,7 @@ async function doInstall () {
 
     case 'win32':
       child1 = spawnSync(`${filePath}`, [ '/S' ])
-      child2 = await spawnAsync(platforms[ plat ].executable, [], {
+      child2 = await spawnSync(platforms[ plat ].executable, [], {
         cwd: platforms[ plat ].location[ arch ]
       })
       break
