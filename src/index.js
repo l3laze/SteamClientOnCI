@@ -97,7 +97,7 @@ async function doInstall () {
 
   console.log(child1.pid + ' is garbage!')
   child2 && console.log(child2.pid + ' is garbage!')
-
+  child2 && console.log(child2.stdout)
   afterInstall()
 }
 
