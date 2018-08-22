@@ -64,17 +64,21 @@ async function doInstall () {
   switch (plat) {
     case 'linux':
     case 'android':
+      /*
       child1 = await execAsync(
         `dpkg --instdir $HOME -i ${filePath} && apt-get install -f`
       )
+      */
       break
 
     case 'darwin':
+      /*
       child1 = await execAsync(
         `yes qy | hdiutil attach ${filePath} ;` +
         `cp -Rf /Volumes/Steam/Steam.app /Applications ;` +
         'open -a Steam.app --args -silent'
       )
+      */
       break
 
     case 'win32':
@@ -83,12 +87,6 @@ async function doInstall () {
       break
   }
 
-  console.log(child1.status)
-  console.log(child1.stdout)
-  console.log(child1.stderr)
-  child2 && console.log(child2.status)
-  child2 && console.log(child2.stdout)
-  child2 && console.log(child2.stderr)
   console.log(readdirSync(
     plat === 'win32'
       ? platforms[ plat ].location[ arch ]
