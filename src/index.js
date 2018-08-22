@@ -91,15 +91,13 @@ async function doInstall () {
 
     case 'win32':
       child1 = spawnSync(`${filePath}`, [ '/S' ])
-      child2 = await execAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`) // , [ '--silent' ])
+      child2 = await spawnAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`) // , [ '--silent' ])
+      child2.setEncoding('utf8')
       break
   }
 
   console.log(child1.pid + ' is garbage!')
   child2 && console.log(child2.pid + ' is garbage!')
-  child2 && console.log(child2.status)
-  child2 && console.log(child2.output.toString('utf8'))
-  child2 && console.log(child2.output.toString('utf8'))
   afterInstall()
 }
 
