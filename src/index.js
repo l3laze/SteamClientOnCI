@@ -2,7 +2,6 @@
 
 const { writeFileSync, readdirSync, existsSync, mkdirSync, lstatSync } = require('fs')
 const { join: pjoin, dirname } = require('path')
-const { promisify } = require('util')
 const plat = require('os').platform()
 const arch = require('os').arch()
 const home = require('os').homedir()
