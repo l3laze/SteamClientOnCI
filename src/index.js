@@ -57,7 +57,7 @@ async function getInstaller () {
 
 async function doInstall () {
   const filePath = await getInstaller()
-  const execAsync = promisify(require('child_process').exec)
+  const spawnAsync = promisify(require('child_process').spawn)
   let child1
   let child2
 
@@ -70,7 +70,7 @@ async function doInstall () {
       break
 
     case 'darwin':
-      child2 = await execAsync(
+      child1 = await execAsync(
         `yes qy | hdiutil attach ${filePath} ;` +
         `cp -Rf /Volumes/Steam/Steam.app /Applications ;` +
         'open -a Steam.app --args -silent'
@@ -78,8 +78,8 @@ async function doInstall () {
       break
 
     case 'win32':
-      child1 = await execAsync(`${filePath} /S`)
-      child2 = await execAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`)
+      child1 = await spawnAsync(`${filePath}`, [ '/S' ])
+      child2 = await spawnAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`)
       break
   }
 
