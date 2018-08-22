@@ -58,8 +58,8 @@ async function getInstaller () {
 async function doInstall () {
   const filePath = await getInstaller()
   const spawnAsync = promisify(require('child_process').spawn)
-  let child1
-  let child2
+  // let child1
+  // let child2
 
   switch (plat) {
     case 'linux':
