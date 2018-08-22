@@ -54,6 +54,14 @@ async function getInstaller () {
   return filePath
 }
 
+function afterInstall () {
+  console.log(readdirSync(
+    plat === 'win32'
+      ? platforms[ plat ].location[ arch ]
+      : platforms[ plat ].location
+  ))
+}
+
 async function doInstall () {
   const filePath = await getInstaller()
   const spawnSync = require('child_process').spawnSync
@@ -89,12 +97,8 @@ async function doInstall () {
 
   console.log(child1.pid + ' is garbage!')
   child2 && console.log(child2.pid + ' is garbage!')
-
-  console.log(readdirSync(
-    plat === 'win32'
-      ? platforms[ plat ].location[ arch ]
-      : platforms[ plat ].location
-  ))
+  
+  afterInstall()
 }
 
 module.exports = {
