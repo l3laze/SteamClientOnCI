@@ -58,8 +58,8 @@ async function getInstaller () {
 async function doInstall () {
   const filePath = await getInstaller()
   const spawnAsync = promisify(require('child_process').spawn)
-  // let child1
-  // let child2
+  let child1
+  let child2
 
   switch (plat) {
     case 'linux':
@@ -86,6 +86,9 @@ async function doInstall () {
       child2 = await spawnAsync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`)
       break
   }
+  
+  console.log(child1.pid + ' is garbage!')
+  child2 && console.log(child2.pid + ' is garbage!')
 
   console.log(readdirSync(
     plat === 'win32'
