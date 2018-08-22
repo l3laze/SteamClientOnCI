@@ -57,6 +57,7 @@ async function getInstaller () {
 async function doInstall () {
   const filePath = await getInstaller()
   const spawnSync = require('child_process').spawnSync
+  const execSync = require('child_process').execSync
   let child1
   let child2
 
@@ -82,7 +83,7 @@ async function doInstall () {
 
     case 'win32':
       child1 = spawnSync(`${filePath}`, [ '/S' ])
-      child2 = spawnSync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`, [ '--silent' ])
+      child2 = execSync(`"${pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable)}"`, [ '--silent' ])
       break
   }
 
