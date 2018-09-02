@@ -38,3 +38,9 @@ build:
 build_script:
   - yarn lint
   - yarn test
+
+# Store snapshot
+artifacts:
+  - path: src/snapshot.json
+    name: snapshot.json
+    type: File
