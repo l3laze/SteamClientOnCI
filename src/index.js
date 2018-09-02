@@ -28,6 +28,7 @@ const platforms = {
     location: pjoin(home, 'Library/Application Support/Steam')
   }
 }
+const { snapshot } = require('./fsSnapshot.js')
 
 async function getInstaller () {
   const fetch = require('node-fetch')
@@ -54,12 +55,17 @@ async function getInstaller () {
   return filePath
 }
 
-function afterInstall () {
-  console.log(readdirSync(
-    plat === 'win32'
-      ? platforms[ plat ].location[ arch ]
-      : platforms[ plat ].location
-  ))
+async function afterInstall () {
+  const dir = (plat === 'win32'
+    ? platforms[ plat ].location[ arch ]
+    : platforms[ plat ].location)
+  console.log(readdirSync(dir))
+
+  const data = JSON.stringify(await snapshot(dir), null, 2)
+
+  console.info(data)
+
+  writeFileSync(pjoin(__dirname, 'snapshot.json'), data)
 }
 
 async function doInstall () {
@@ -99,7 +105,7 @@ async function doInstall () {
 
   console.log(child1.pid + ' is garbage!')
   child2 && console.log(child2.pid + ' is garbage!')
-  afterInstall()
+  await afterInstall()
 }
 
 module.exports = {
