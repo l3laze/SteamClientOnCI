@@ -63,7 +63,7 @@ async function afterInstall () {
 
   const data = JSON.stringify(await snapshot(dir), null, 2)
 
-  console.info(data)
+  console.info('snapshot bytes: %s', data.length)
 
   writeFileSync(pjoin(__dirname, 'snapshot.json'), data)
 }
