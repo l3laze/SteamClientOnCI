@@ -1,13 +1,13 @@
 'use strict'
 
-const { dirname, join, resolve, sep } = require('path')
+const { basename, dirname, join, resolve } = require('path')
 const { promisify } = require('util')
 const afs = {
   readdirAsync: promisify(require('fs').readdir),
   readFileAsync: promisify(require('fs').readFile),
   statAsync: promisify(require('fs').stat)
 }
-const _whitelist = {}
+let whitelist = null
 
 /*
  * Based on https://gist.github.com/a1a6913944c55843ed3e999b16350b50
@@ -22,24 +22,18 @@ async function fileChecksum (str) {
     .digest('hex')
 }
 
-async function isWhitelisted (target, whitelist) {
-  if (typeof whitelist !== 'object' || whitelist.constructor.name !== 'Object') {
-    throw new TypeError('isWhitelisted: whitelist must be an Object.')
-  } else if (typeof target !== 'string') {
-    throw new TypeError('isWhitelisted: target must be a path as a string.')
+async function isWhitelisted (target) {
+  if (typeof target !== 'string') {
+    throw new TypeError('isWhitelisted: target must be a path as a string, but got a %s.', target.constructor.name)
   }
 
-  const splitPath = target.split(sep)
-  const wkeys = Object.keys(whitelist)
-  const wvals = Object.values(whitelist)
-
-  if (! wkeys.includes(splitPath[ 0 ]) || wkeys.includes('*')) {
-    return false
-  } else if (splitPath.length === 1 || (wkeys.length === 1 && (wkeys[ 0 ] === '*' || wvals[ 0  ] === '*'))) {
-      return true
+  if ((whitelist.constructor.name === 'RegExp' && whitelist.test(target) === true) ||
+    (whitelist.constructor.name === 'Array' && whitelist.includes(basename(target))) ||
+    (typeof whitelist === string && whitelist === '*')
+  ) {
+    return true
   } else {
-    const wl = whitelist[ splitPath[ 0 ]]
-    return isWhitelisted(splitPath.slice(1), wl)
+    return false
   }
 }
 
@@ -51,9 +45,9 @@ async function statObj (target) {
     atime: stats.atime,
     ctime: stats.ctime,
     mtime: stats.mtime,
-    type: (stats.isDirectory()
+    type: (await stats.isDirectory()
       ? 'directory'
-      : stats.isFile()
+      : await stats.isFile()
         ? 'file'
         : 'unknown')
   }
@@ -73,26 +67,27 @@ async function fileSnapshot (file, includeData) {
 }
 
 async function entrySnapshot (target) {
-  if (isWhitelisted(target, _whitelist)) {
+  if (await isWhitelisted(target)) {
     const snap = {
       stats: await statObj(target),
       path: target
     }
-  
+
     if (snap.stats.type === 'directory') {
       const entries = await afs.readdirAsync(target)
-  
+      snap.children = []
+
       let entry
       for (entry in entries) {
-        entries[ entry ] = entrySnapshot(join(target, entries[ entry ]))
+        snap.children.push(await entrySnapshot(join(target, entries[ entry ])))
       }
-  
-      snap.children = await Promise.all(entries)
+
+      // snap.children = await Promise.all(entries)
     } else if (snap.stats.type === 'file') {
       snap.data = await fileSnapshot(target, false)
-  
+
       snap.checksum = '' + snap.data.checksum
-  
+
       if (typeof snap.data.data !== 'undefined') {
         snap.data = snap.data.data
       } else {
@@ -106,15 +101,21 @@ async function entrySnapshot (target) {
   return {}
 }
 
-async function snapshot (dir, daWhitelist = {}) {
+async function snapshot (dir, daWhitelist = null) {
   dir = resolve(dir)
   const stats = await afs.statAsync(dir)
   const isDir = stats.isDirectory()
   const target = (isDir ? dir : dirname(dir))
 
-  Object.keys(daWhitelist).forEach((k) => {
-    _whitelist[ k ] = daWhitelist[ k ]
-  })
+  if (daWhitelist === null) {
+    whitelist = '.*'
+  } else if (typeof daWhitelist === 'string') {
+    whitelist = RegExp(daWhitelist)
+  } else if (typeof daWhitelist === 'object' && (daWhitelist.constructor.name === 'RegExp' || daWhitelist.constructor.name === 'Array')) {
+    whitelist = daWhitelist
+  } else {
+    throw new Error('Whitelist must be a RegExp, a RegExp as a string or an array of file names, but got a %s.', daWhitelist.constructor.name)
+  }
 
   const snap = await entrySnapshot(target)
 
