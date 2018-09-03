@@ -63,6 +63,12 @@ async function entrySnapshot (target) {
     snap.children = await Promise.all(entries)
   } else if (entryStat.isFile()) {
     snap.data = await fileSnapshot(target, false)
+
+    if (typeof snap.data.data === 'undefined') {
+      return snap.data
+    } else {
+      return snap
+    }
   }
 
   return snap
