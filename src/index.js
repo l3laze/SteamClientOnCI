@@ -61,7 +61,7 @@ async function afterInstall () {
     : platforms[ plat ].location)
   console.log(readdirSync(dir))
 
-  const data = JSON.stringify(await snapshot(dir), null, 2)
+  const data = JSON.stringify(await snapshot(dir, '*'), null, 2)
 
   console.info('snapshot bytes: %s', data.length)
 
