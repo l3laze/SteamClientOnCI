@@ -64,10 +64,12 @@ async function entrySnapshot (target) {
   } else if (entryStat.isFile()) {
     snap.data = await fileSnapshot(target, false)
 
-    if (typeof snap.data.data === 'undefined') {
-      return snap.data
+    snap.checksum = '' + snap.data.checksum
+
+    if (typeof snap.data.data !== 'undefined') {
+      snap.data = snap.data.data
     } else {
-      return snap
+      delete snap.data
     }
   }
 
