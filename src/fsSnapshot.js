@@ -108,7 +108,7 @@ async function snapshot (dir, daWhitelist = null) {
   const target = (isDir ? dir : dirname(dir))
 
   if (daWhitelist === null) {
-    whitelist = '.*'
+    whitelist = '*'
   } else if (typeof daWhitelist === 'string') {
     whitelist = RegExp(daWhitelist)
   } else if (typeof daWhitelist === 'object' && (daWhitelist.constructor.name === 'RegExp' || daWhitelist.constructor.name === 'Array')) {

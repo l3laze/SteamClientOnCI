@@ -15,7 +15,7 @@ const { resolve, join } = require('path')
   const list = [ 'src', 'fsSnapshot.js', 'index.js' ]
   console.info('List %O = %s', list, JSON.stringify(await snapshot(dir, list), null, 2))
 
-  console.info('List %O = %s', list, JSON.stringify(await snapshot(dir, '*'), null, 2))
+  console.info('Default (everything) = %s', JSON.stringify(await snapshot(dir), null, 2))
 }()).catch((err) => {
   console.error(err)
 })
