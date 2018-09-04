@@ -122,6 +122,42 @@ async function snapshot (dir, daWhitelist = null) {
   return snap
 }
 
+async function snapshotStats (snap) {
+  const stats = {
+    directories: 0,
+    files: 0,
+    size: 0
+  }
+
+  let index
+  let cstats = {
+    directories: 0,
+    files: 0,
+    size: 0
+  }
+
+  if (typeof snap.children !== 'undefined') {
+    for (index in snap.children) {
+      cstats = await snapshotStats(snap.children[ index ])
+
+      stats.size += cstats.size
+      stats.directories += cstats.directories
+      stats.files += cstats.files
+    }
+  }
+
+  if (snap.stats.type === 'directory') {
+    stats.directories += 1
+  } else if (snap.stats.type === 'file') {
+    stats.files += 1
+  }
+
+  stats.size += snap.stats.size
+
+  return stats
+}
+
 module.exports = {
-  snapshot
+  snapshot,
+  snapshotStats
 }

@@ -28,7 +28,7 @@ const platforms = {
     location: pjoin(home, 'Library/Application Support/Steam')
   }
 }
-const { snapshot } = require('./fsSnapshot.js')
+const { snapshot, snapshotStats } = require('./fsSnapshot.js')
 
 async function getInstaller () {
   const fetch = require('node-fetch')
@@ -61,9 +61,10 @@ async function afterInstall () {
     : platforms[ plat ].location)
   console.log(readdirSync(dir))
 
-  const data = JSON.stringify(await snapshot(dir), null, 2)
+  const snap = await snapshot(dir)
+  const data = JSON.stringify(snap, null, 2)
 
-  console.info('snapshot bytes: %s', data.length)
+  console.info('snapshotStats: %j', await snapshotStats(snap))
 
   writeFileSync(pjoin(__dirname, 'snapshot.json'), data)
 }
