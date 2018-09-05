@@ -8,6 +8,11 @@ const afs = {
   statAsync: promisify(require('fs').stat)
 }
 let whitelist = null
+const allStats = {
+  directories: 0,
+  files: 0,
+  size: 0
+}
 
 /*
  * Based on https://gist.github.com/a1a6913944c55843ed3e999b16350b50
@@ -73,7 +78,10 @@ async function entrySnapshot (target) {
       path: target
     }
 
+    allStats.size += snap.stats.size
+
     if (snap.stats.type === 'directory') {
+      allStats.directories += 1
       const entries = await afs.readdirAsync(target)
       snap.children = []
 
@@ -82,8 +90,9 @@ async function entrySnapshot (target) {
         snap.children.push(await entrySnapshot(join(target, entries[ entry ])))
       }
 
-      // snap.children = await Promise.all(entries)
+      // snap.children = await Promise.all(snap.children)
     } else if (snap.stats.type === 'file') {
+      allStats.files += 1
       snap.data = await fileSnapshot(target, false)
 
       snap.checksum = '' + snap.data.checksum
@@ -117,47 +126,52 @@ async function snapshot (dir, daWhitelist = null) {
     throw new Error('Whitelist must be a RegExp, a RegExp as a string or an array of file names, but got a %s.', daWhitelist.constructor.name)
   }
 
+  allStats.directories = 0
+  allStats.files = 0
+  allStats.size = 0
+
   const snap = await entrySnapshot(target)
 
-  return snap
+  return [ snap, allStats ]
 }
 
-async function snapshotStats (snap) {
-  const stats = {
-    directories: 0,
-    files: 0,
-    size: 0
-  }
-
-  let index
-  let cstats = {
-    directories: 0,
-    files: 0,
-    size: 0
-  }
-
-  if (typeof snap.children !== 'undefined') {
-    for (index in snap.children) {
-      cstats = await snapshotStats(snap.children[ index ])
-
-      stats.size += cstats.size
-      stats.directories += cstats.directories
-      stats.files += cstats.files
+/*
+  async function snapshotStats (snap) {
+    const stats = {
+      directories: 0,
+      files: 0,
+      size: 0
     }
+
+    let index
+    let cstats = {
+      directories: 0,
+      files: 0,
+      size: 0
+    }
+
+    if (typeof snap.children !== 'undefined') {
+      for (index in snap.children) {
+        cstats = await snapshotStats(snap.children[ index ])
+
+        stats.size += cstats.size
+        stats.directories += cstats.directories
+        stats.files += cstats.files
+      }
+    }
+
+    if (snap.stats.type === 'directory') {
+      stats.directories += 1
+    } else if (snap.stats.type === 'file') {
+      stats.files += 1
+    }
+
+    stats.size += snap.stats.size
+
+    return stats
   }
-
-  if (snap.stats.type === 'directory') {
-    stats.directories += 1
-  } else if (snap.stats.type === 'file') {
-    stats.files += 1
-  }
-
-  stats.size += snap.stats.size
-
-  return stats
-}
+*/
 
 module.exports = {
-  snapshot,
-  snapshotStats
+  snapshot
 }
