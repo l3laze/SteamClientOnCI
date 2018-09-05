@@ -86,11 +86,11 @@ async function entrySnapshot (target) {
       snap.children = []
 
       let entry
-      for (entry in entries) {
-        snap.children.push(await entrySnapshot(join(target, entries[ entry ])))
+      for (entry = 0; entry < entries.length; entry++) {
+        entries[ entry ] = entrySnapshot(join(target, entries[ entry ]))
       }
 
-      // snap.children = await Promise.all(snap.children)
+      snap.children = await Promise.all(entries)
     } else if (snap.stats.type === 'file') {
       allStats.files += 1
       snap.data = await fileSnapshot(target, false)
@@ -132,45 +132,11 @@ async function snapshot (dir, daWhitelist = null) {
 
   const snap = await entrySnapshot(target)
 
-  return [ snap, allStats ]
-}
-
-/*
-  async function snapshotStats (snap) {
-    const stats = {
-      directories: 0,
-      files: 0,
-      size: 0
-    }
-
-    let index
-    let cstats = {
-      directories: 0,
-      files: 0,
-      size: 0
-    }
-
-    if (typeof snap.children !== 'undefined') {
-      for (index in snap.children) {
-        cstats = await snapshotStats(snap.children[ index ])
-
-        stats.size += cstats.size
-        stats.directories += cstats.directories
-        stats.files += cstats.files
-      }
-    }
-
-    if (snap.stats.type === 'directory') {
-      stats.directories += 1
-    } else if (snap.stats.type === 'file') {
-      stats.files += 1
-    }
-
-    stats.size += snap.stats.size
-
-    return stats
+  return {
+    stats: allStats,
+    data: snap
   }
-*/
+}
 
 module.exports = {
   snapshot
