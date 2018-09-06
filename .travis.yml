@@ -4,17 +4,19 @@ node_js: "lts/*"
 
 os:
   - linux
-  - osx
+#  - osx
 
 cache:
   yarn: true
 
-before_install:
-  - npm i -g yarn
-
 script:
-  - yarn lint
-  - yarn test
+  - sudo dpkg --add-architecture i386
+  - sudo apt update
+  - curl -o steam.deb -L http://steamcdn-a.akamaihd.net/client/installer/steam.deb
+  - sudo apt -y install ./steam.deb
+  - xvfb-run --server-args="-screen 0 1024x768x24" steam &
+  - sleep 1m
+  - steam -shutdown
 
 after_success:
 

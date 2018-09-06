@@ -1,6 +1,6 @@
 'use strict'
 
-const { writeFileSync, readdirSync, existsSync, mkdirSync, lstatSync } = require('fs')
+const { writeFileSync, existsSync, mkdirSync, lstatSync } = require('fs')
 const { join: pjoin, dirname } = require('path')
 const plat = require('os').platform()
 const arch = require('os').arch()
@@ -60,7 +60,7 @@ async function afterInstall () {
     ? platforms[ plat ].location[ arch ]
     : platforms[ plat ].location)
 
-  console.log(readdirSync(dir))
+  // console.log(readdirSync(dir))
 
   const snap = await snapshot(dir)
 
@@ -69,41 +69,42 @@ async function afterInstall () {
   writeFileSync(pjoin(__dirname, 'snapshot.json'), JSON.stringify(snap, null, 2))
 }
 
-async function doInstall () {
+async function doInstall (u, n) {
   const filePath = await getInstaller()
   const spawnSync = require('child_process').spawnSync
   // const spawnAsync = require('util').promisify(require('child_process').spawn)
   let child1
   let child2
+  let child3
 
   switch (plat) {
     case 'linux':
     case 'android':
-      /*
-      child1 = await execAsync(
-        `dpkg --instdir $HOME -i ${filePath} && apt-get install -f`
+      child1 = spawnSync(
+        `dpkg --instdir $HOME -i ${filePath} && apt-get install -f && steam`
       )
-      */
       break
 
     case 'darwin':
-      /*
-      child1 = await execAsync(
-        `yes qy | hdiutil attach ${filePath} ;` +
-        `cp -Rf /Volumes/Steam/Steam.app /Applications ;` +
-        'open -a Steam.app --args -silent'
+      child1 = spawnSync(
+        `yes qy | hdiutil attach ${filePath} &&` +
+        `cp -Rf /Volumes/Steam/Steam.app /Applications &&` +
+        'open -a Steam.app --args'
       )
-      */
       break
 
     case 'win32':
       child1 = spawnSync(`${filePath}`, [ '/S' ])
-      child2 = await spawnSync(platforms[ plat ].executable, [], {
+      child2 = spawnSync(pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable), [], {
+        cwd: platforms[ plat ].location[ arch ]
+      })
+      child3 = spawnSync(pjoin(platforms[ plat ].location[ arch ], platforms[ plat ].executable), [ '-login ' + u + ' ' + n ], {
         cwd: platforms[ plat ].location[ arch ]
       })
 
       console.info('child1: %s', child1.stdout)
       console.info('child2: %s', child2.stdout)
+      console.info('child3: %s', child3.stdout)
       break
   }
 

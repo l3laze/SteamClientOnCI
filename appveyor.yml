@@ -2,7 +2,7 @@
 environment:
   yarn_version: '1.9.4'
   matrix:
-  - nodejs_version: 8
+    - nodejs_version: 8
 
 # Build using both 32-bit and 64-bit Windows.
 platform:
@@ -36,8 +36,7 @@ build:
 
 # Run build (tests)
 build_script:
-  - yarn lint
-  - yarn test
+  - yarn lint && yarn test %steamu% %steamp%
 
 # Store snapshot
 artifacts:
