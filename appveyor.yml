@@ -23,6 +23,11 @@ install:
   - yarn --version
   - yarn
 
+  - ps: Write-Host "Installing Steam..."
+  - ps: (New-Object Net.WebClient).DownloadFile("http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$env:temp\SteamSetup.exe")
+  - ps: Start-Process -FilePath $env:temp\SteamSetup.exe -ArgumentList /S -Wait -PassThru
+  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-login $env:steamu $env:steamp" -Wait -PassThru
+
 
 # Cache some dirs for faster build.
 cache:
@@ -36,7 +41,7 @@ build:
 
 # Run build (tests)
 build_script:
-  - yarn lint && yarn test %steamu% %steamp%
+  - yarn lint # && yarn test
 
 # Store snapshot
 artifacts:
