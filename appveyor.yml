@@ -1,13 +1,10 @@
 # Build with NodeJS v# using architecture-specific instalallations
 environment:
   yarn_version: '1.9.4'
-  matrix:
-    - nodejs_version: 8
 
 # Build using both 32-bit and 64-bit Windows.
 platform:
   - x64
-#  - x86
 
 # Because of this:
 #   https://help.github.com/articles/dealing-with-line-endings/
@@ -15,25 +12,14 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - ps: Install-Product node $env:nodejs_version $env:Platform
-  - npm i -g npm
-  - ps: Write-Host "Installing Yarn..."
-  - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/yarnpkg/yarn/releases/download/v' + $env:yarn_version + '/yarn-' + $env:yarn_version + '.msi', "$env:temp\yarn-" + $env:yarn_version + ".msi")
-  - ps: cmd /c start /wait msiexec.exe /i $env:temp\yarn-$env:yarn_version.msi /quiet
-  - yarn --version
-  - yarn
-
   - ps: Write-Host "Installing Steam..."
   - ps: (New-Object Net.WebClient).DownloadFile("http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$env:temp\SteamSetup.exe")
   - ps: Start-Process -FilePath $env:temp\SteamSetup.exe -ArgumentList /S -Wait -PassThru
-  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList @("-login ", $env:steamu, $env:steamp) -PassThru -WindowStyle Hidden
-  - ps: Start-Sleep -s 60
+  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList @("-login", $env:steamu, $env:steamp) -PassThru -WindowStyle Hidden
+  - ps: Start-Sleep -s 240
   - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
-
-# Cache some dirs for faster build.
-cache:
-  - "%LOCALAPPDATA%\\Yarn"
-
+  - dir "C:\Program Files (x86)\Steam"
+  - dir "C:\Program Files (x86)\Steam\config"
 
 # Quiet-ish build.
 build:
@@ -42,10 +28,4 @@ build:
 
 # Run build (tests)
 build_script:
-  - yarn lint && yarn test "C:\Program Files (x86)\Steam"
-
-# Store snapshot
-artifacts:
-  - path: .\snapshot.json
-    name: snapshot.json
-    type: File
+  - echo "Hi"
