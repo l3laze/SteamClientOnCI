@@ -27,8 +27,9 @@ install:
   - ps: (New-Object Net.WebClient).DownloadFile("http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$env:temp\SteamSetup.exe")
   - ps: Start-Process -FilePath $env:temp\SteamSetup.exe -ArgumentList /S -Wait -PassThru
   - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-login $env:steamu $env:steamp" -PassThru -WindowStyle Hidden
-  - ps: Start-Sleep -s 180
-  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
+  - ps: Start-Sleep -s 60
+  # - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
+  - ps: Start-Process echoargs -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
 
 # Cache some dirs for faster build.
 cache:
@@ -42,10 +43,10 @@ build:
 
 # Run build (tests)
 build_script:
-  - yarn lint # && yarn test
+  - yarn lint && yarn test "C:\Program Files (x86)\Steam"
 
 # Store snapshot
 artifacts:
-  - path: src/snapshot.json
+  - path: .\snapshot.json
     name: snapshot.json
     type: File
