@@ -26,10 +26,9 @@ install:
   - ps: Write-Host "Installing Steam..."
   - ps: (New-Object Net.WebClient).DownloadFile("http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$env:temp\SteamSetup.exe")
   - ps: Start-Process -FilePath $env:temp\SteamSetup.exe -ArgumentList /S -Wait -PassThru
-  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-login $env:steamu $env:steamp" -PassThru -WindowStyle Hidden
+  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList @("-login ", $env:steamu, $env:steamp) -PassThru -WindowStyle Hidden
   - ps: Start-Sleep -s 60
-  # - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
-  - ps: Start-Process echoargs -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
+  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
 
 # Cache some dirs for faster build.
 cache:
