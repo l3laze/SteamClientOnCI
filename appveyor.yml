@@ -25,14 +25,19 @@ install:
 
   - ps: Write-Host "Installing Steam..."
   - ps: (New-Object Net.WebClient).DownloadFile("http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$env:temp\SteamSetup.exe")
-  - ps: Start-Process -FilePath $env:temp\SteamSetup.exe -ArgumentList /S -Wait -PassThru
-  - ps: Start-Sleep -s 180
+  - cd %temp%
+  - SteamSetup.exe /S /v /qb
+  - timeout 5
+  - taskkill.exe /F /IM Steam.exe || ( cmd /c "exit /b 0" )
   - cd "C:\\Program Files (x86)\\Steam"
-  - Steam.exe -login %steamu% %steamp%
-  - ps: Start-Sleep -s 120
-  - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList "-shutdown" -Wait -PassThru -WindowStyle Hidden
+  - Steam.exe || ( cmd /c "exit /b 0" )
+  - timeout 5
+  - taskkill.exe /F /IM Steam.exe || ( cmd /c "exit /b 0" )
+  - start Steam.exe -login "%steamu%" "%steamp%"
+  - timeout 15
+  - Steam.exe -shutdown
   - dir "C:\Program Files (x86)\Steam"
-  - dir "C:\Program Files (x86)\Steam\\config"
+  - cd %APPVEYOR_BUILD_FOLDER%
 
 # Cache some dirs for faster build.
 cache:
