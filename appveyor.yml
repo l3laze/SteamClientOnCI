@@ -30,7 +30,7 @@ install:
 cache:
   - "%LOCALAPPDATA%\\Yarn"
   - "%TEMP%\\SteamSetup.exe"
-  # - "C:\\Program Files (x86)\\Steam"
+  - "C:\\Program Files (x86)\\Steam"
 
 
 # Quiet-ish build.

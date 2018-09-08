@@ -9,6 +9,12 @@ SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 set me=%~n0
 set parent=%~dp0
 
+if exist "C:\\Program Files (x86)\\Steam\\config\\loginusers.vdf" (
+  echo "loginusers.vdf does exist."
+) else (
+  echo "loginusers.vdf does not exist."
+)
+
 if not exist "C:\\Program Files (x86)\\Steam" (
   cd "%temp%"
 
@@ -25,19 +31,24 @@ if not exist "C:\\Program Files (x86)\\Steam" (
 
 cd "C:\\Program Files (x86)\\Steam"
 echo "Updating"
-Steam.exe
+start Steam.exe
 timeout 45
-start "" Steam.exe "-shutdown"
-timeout 15
+Steam.exe "-shutdown"
+timeout 10
 taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
 
-echo "Logging in"
-start "" Steam.exe "-login" "%steamu%" "%steamp%"
-timeout 45
-start "" Steam.exe "-shutdown"
-echo "Exiting.."
-timeout 15
-taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
+if exist "C:\\Program Files (x86)\\Steam\\config\\loginusers.vdf" (
+  echo "loginusers.vdf does exist."
+) else (
+  echo "Logging in"
+  start "" Steam.exe "-login" "%steamu%" "%steamp%"
+  timeout 30
+  Steam.exe "-shutdown"
+  echo "Exiting.."
+  timeout 10
+  taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
+)
+
 goto END
 
 :END
