@@ -24,8 +24,8 @@ if not exist "C:\\Program Files (x86)\\Steam" (
 
 cd "C:\\Program Files (x86)\\Steam"
 echo "Updating"
-Steam.exe
-timeout 15
+cmd /c start Steam.exe
+timeout 45
 Steam.exe "-shutdown"
 timeout 15
 taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
