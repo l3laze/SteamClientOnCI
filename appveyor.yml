@@ -24,12 +24,13 @@ install:
   - yarn
 
   - cmd /c "install.bat"
+        
 
 # Cache some dirs for faster build.
 cache:
   - "%LOCALAPPDATA%\\Yarn"
   - "%TEMP%\\SteamSetup.exe"
-  - "C:\\Program Files (x86)\\Steam"
+  # - "C:\\Program Files (x86)\\Steam"
 
 
 # Quiet-ish build.
