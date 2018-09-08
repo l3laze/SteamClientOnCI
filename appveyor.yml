@@ -28,6 +28,7 @@ install:
 # Cache some dirs for faster build.
 cache:
   - "%LOCALAPPDATA%\\Yarn"
+  - "%TEMP%\\SteamSetup.exe"
   - "C:\\Program Files (x86)\\Steam"
 
 
