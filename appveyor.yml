@@ -27,15 +27,15 @@ install:
         Write-Host "Installing Steam..." `
         (New-Object Net.WebClient).DownloadFile('http://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe', $env:temp + '\SteamSetup.exe') `
       }
-  - if not exist "C:\\Program Files (x86)\\Steam" (
-      "!temp!\\SteamSetup.exe" /S /v /qb
-      timeout 10
-      taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
-      powershell Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -NoNewWindow
-      timeout 60
-      taskkill.exe /F /T /IM steam* || ( cmd /c "exit /b 0" )
-      echo "Installed Steam"
-    )
+  - ps: if (not exist "C:\\Program Files (x86)\\Steam") { `
+        "!temp!\\SteamSetup.exe" /S /v /qb `
+        timeout 10 `
+        taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" ) `
+        powershell Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -NoNewWindow `
+        timeout 60 `
+        taskkill.exe /F /T /IM steam* || ( cmd /c "exit /b 0" ) `
+        echo "Installed Steam" `
+      }
   - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList @("-login", $env:steamu, $env:steamp) -NoNewWindow
   - timeout 60
   - ps: Start-Process -FilePath "C:\\Program Files (x86)\\Steam\\Steam.exe" -ArgumentList @("-shutdown") -NoNewWindow
