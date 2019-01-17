@@ -10,7 +10,7 @@ const { join } = require('path')
   try {
     const target = process.argv[ 2 ]
     const result = await snapshot(target)
-    writeFileSync(join('snapshot.json'), JSON.stringify(result, null, 2))
+    writeFileSync(join('snapshot', 'snapshot.json'), JSON.stringify(result, null, 2))
     console.info(result.stats)
   } catch (err) {
     console.error(err.message)

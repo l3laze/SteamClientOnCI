@@ -34,7 +34,7 @@ async function isWhitelisted (target) {
 
   if ((whitelist.constructor.name === 'RegExp' && whitelist.test(target) === true) ||
     (whitelist.constructor.name === 'Array' && whitelist.includes(basename(target))) ||
-    (typeof whitelist === 'string' && whitelist === '*')
+    (typeof whitelist === 'string' && whitelist === basename(target))
   ) {
     return true
   } else {

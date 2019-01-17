@@ -3,20 +3,34 @@ language: node_js
 node_js: "lts/*"
 
 os:
-  - linux
-#  - osx
+# - linux
+  - osx
 
 cache:
   yarn: true
+  directories: ./snapshot
 
 script:
-  - sudo dpkg --add-architecture i386
-  - sudo apt update
-  - curl -o steam.deb -L http://steamcdn-a.akamaihd.net/client/installer/steam.deb
-  - sudo apt -y install ./steam.deb
-  - xvfb-run --server-args="-screen 0 1024x768x24" steam &
-  - sleep 1m
-  - steam -shutdown
+# Linux
+#  - sudo dpkg --add-architecture i386
+#  - sudo apt update
+#  - curl -o steam.deb -L http://steamcdn-a.akamaihd.net/client/installer/steam.deb
+#  - sudo apt -y install ./steam.deb
+#  - xvfb-run --server-args="-screen 0 1024x768x24" steam &
+#  - sleep 1m
+#  - steam -shutdown
+#
+#
+# Mac
+  - curl -o ~/Desktop/Steam.dmg -L https://steamcdn-a.akamaihd.net/client/installer/steam.dmg
+  - hdiutil attach ~/Desktop/Steam.dmg
+  - cp -R /Volumes/Steam/*.app /Applications
+  - hdiutil unmount Steam.app
+  - ls -al /Applications
+  - ls -al ~/Library/Application\ Support/Steam
+  - open -a Steam --args -login $stu $stp
+  - ls -al ~/Library/Application\ Support/Steam
+  - yarn test ~/Library/Application\ Support/Steam $stu
 
 after_success:
 
