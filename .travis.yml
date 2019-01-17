@@ -23,7 +23,7 @@ script:
 #
 # Mac
   - curl -o ~/Desktop/Steam.dmg -L https://steamcdn-a.akamaihd.net/client/installer/steam.dmg
-  - hdiutil attach ~/Desktop/Steam.dmg
+  - hdiutil attach -qy ~/Desktop/Steam.dmg
   - cp -R /Volumes/Steam/*.app /Applications
   - hdiutil unmount Steam.app
   - ls -al /Applications
