@@ -73,6 +73,8 @@ async function fileSnapshot (file, includeData) {
 
 async function entrySnapshot (target) {
   if (await isWhitelisted(target)) {
+    console.info(`Taking snapshot of ${target}.`)
+
     const snap = {
       stats: await statObj(target),
       path: target
@@ -110,13 +112,13 @@ async function entrySnapshot (target) {
   return {}
 }
 
-async function snapshot (dir, daWhitelist = null) {
+async function snapshot (dir, daWhitelist) {
   dir = resolve(dir)
   const stats = await afs.statAsync(dir)
   const isDir = stats.isDirectory()
   const target = (isDir ? dir : dirname(dir))
 
-  if (daWhitelist === null) {
+  if (!daWhitelist) {
     whitelist = '*'
   } else if (typeof daWhitelist === 'string') {
     whitelist = RegExp(daWhitelist)

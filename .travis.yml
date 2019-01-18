@@ -6,8 +6,9 @@ os:
 # - linux
   - osx
 
+osx_image: xcode8
+
 cache:
-  yarn: true
   directories: ./snapshot
 
 script:
@@ -22,15 +23,26 @@ script:
 #
 #
 # Mac
+  - npm i -g npm
+#  - curl -o- -L https://yarnpkg.com/install.sh | bash
+#  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+#  - yarn --version
   - curl -o ~/Desktop/Steam.dmg -L https://steamcdn-a.akamaihd.net/client/installer/steam.dmg
-  - hdiutil attach -qy ~/Desktop/Steam.dmg
-  - cp -R /Volumes/Steam/*.app /Applications
-  - hdiutil unmount Steam.app
-  - ls -al /Applications
-  - ls -al ~/Library/Application\ Support/Steam
-  - open -a Steam --args -login $stu $stp
-  - ls -al ~/Library/Application\ Support/Steam
-  - yarn test ~/Library/Application\ Support/Steam $stu
+  - yes | hdiutil attach ~/Desktop/Steam.dmg &> /dev/null
+  - cp -R /Volumes/Steam/Steam.app /Applications
+  - hdiutil unmount /Volumes/Steam
+  - /Applications/Steam.app/contents/MacOS/steam.sh -shutdown || echo "Exited with code $?"
+  - sleep 10
+  - sudo killall -9 steam || echo "Steam is not running"
+  - /Applications/Steam.app/contents/MacOS/steam.sh -shutdown || echo "Exited with code $?"
+  - sleep 10
+  - sudo killall -9 steam || echo "Steam is not running"
+  - /Applications/Steam.app/contents/MacOS/steam.sh -login $stu $stp -shutdown || echo "Exited with code $?"
+  - sleep 10
+  - sudo killall -9 steam || echo "Steam is not running"
+  - ls -a ~/Library/Application\ Support/Steam
+#  - yarn test ~/Library/Application\ Support/Steam
+  - node tests/test.js ~/Library/Application\ Support/Steam
 
 after_success:
 
