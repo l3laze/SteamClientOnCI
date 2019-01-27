@@ -7,7 +7,6 @@ const afs = {
   readFileAsync: promisify(require('fs').readFile),
   statAsync: promisify(require('fs').stat)
 }
-let whitelist = null
 const allStats = {
   directories: 0,
   files: 0,
@@ -27,21 +26,6 @@ async function fileChecksum (str) {
     .digest('hex')
 }
 
-async function isWhitelisted (target) {
-  if (typeof target !== 'string') {
-    throw new TypeError('isWhitelisted: target must be a path as a string, but got a %s.', target.constructor.name)
-  }
-
-  if ((whitelist.constructor.name === 'RegExp' && whitelist.test(target) === true) ||
-    (whitelist.constructor.name === 'Array' && whitelist.includes(basename(target))) ||
-    (typeof whitelist === 'string' && whitelist === basename(target))
-  ) {
-    return true
-  } else {
-    return false
-  }
-}
-
 async function statObj (target) {
   const stats = await afs.statAsync(target)
 
@@ -58,81 +42,88 @@ async function statObj (target) {
   }
 }
 
-async function fileSnapshot (file, includeData) {
+async function fileSnapshot (file, opts) {
   const data = await afs.readFileAsync(file)
   const snap = {
-    checksum: await fileChecksum(data)
+    checksum: opts.checksum ? await fileChecksum(data) : ''
   }
 
-  if (includeData) {
+  if (opts.data) {
     snap.data = data
   }
 
   return snap
 }
 
-async function entrySnapshot (target) {
-  if (await isWhitelisted(target)) {
-    console.info(`Taking snapshot of ${target}.`)
-
-    const snap = {
-      stats: await statObj(target),
-      path: target
-    }
-
-    allStats.size += snap.stats.size
-
-    if (snap.stats.type === 'directory') {
-      allStats.directories += 1
-      const entries = await afs.readdirAsync(target)
-      snap.children = []
-
-      let entry
-      for (entry = 0; entry < entries.length; entry++) {
-        entries[ entry ] = entrySnapshot(join(target, entries[ entry ]))
-      }
-
-      snap.children = await Promise.all(entries)
-    } else if (snap.stats.type === 'file') {
-      allStats.files += 1
-      snap.data = await fileSnapshot(target, false)
-
-      snap.checksum = '' + snap.data.checksum
-
-      if (typeof snap.data.data !== 'undefined') {
-        snap.data = snap.data.data
-      } else {
-        delete snap.data
-      }
-    }
-
-    return snap
+async function entrySnapshot (target, opts, currDepth) {
+  if (opts.verbose === true) {
+    console.info(`Adding ../${basename(dirname(target))}/${basename(target)} to snapshot.`)
   }
 
-  return {}
+  const snap = {
+    stats: await statObj(target),
+    path: target
+  }
+
+  allStats.size += snap.stats.size
+
+  if (snap.stats.type === 'directory') {
+    allStats.directories += 1
+
+    if (opts.depth === -1 || currDepth < opts.depth) {
+      // console.info('depth: ', opts.depth, currDepth)
+
+      const entries = await afs.readdirAsync(target)
+      const locOps = opts
+
+      snap.children = []
+      currDepth++
+
+      for (let entry = 0; entry < entries.length; entry++) {
+        snap.children.push(await entrySnapshot(join(target, entries[ entry ]), locOps, currDepth))
+      }
+
+      snap.children = entries
+    }
+  } else if (snap.stats.type === 'file') {
+    allStats.files += 1
+    snap.data = await fileSnapshot(target, opts)
+
+    snap.checksum = '' + snap.data.checksum
+
+    if (opts.data === true && typeof snap.data.data !== 'undefined') {
+      snap.data = snap.data.data
+    } else {
+      delete snap.data
+    }
+  }
+
+  return snap
 }
 
-async function snapshot (dir, daWhitelist) {
+async function snapshot (dir, options = { checksum: false, data: false, depth: -1, verbose: false }) {
   dir = resolve(dir)
   const stats = await afs.statAsync(dir)
   const isDir = stats.isDirectory()
   const target = (isDir ? dir : dirname(dir))
-
-  if (!daWhitelist) {
-    whitelist = '*'
-  } else if (typeof daWhitelist === 'string') {
-    whitelist = RegExp(daWhitelist)
-  } else if (typeof daWhitelist === 'object' && (daWhitelist.constructor.name === 'RegExp' || daWhitelist.constructor.name === 'Array')) {
-    whitelist = daWhitelist
-  } else {
-    throw new Error('Whitelist must be a RegExp, a RegExp as a string or an array of file names, but got a %s.', daWhitelist.constructor.name)
-  }
+  const tmp = parseInt(options.depth)
 
   allStats.directories = 0
   allStats.files = 0
   allStats.size = 0
 
-  const snap = await entrySnapshot(target)
+  console.info(`Creating snapshot of ${isDir ? 'directory' : 'file'} ${target} to a max depth of ${isNaN(tmp) ? 0 : tmp}, ${options.verbose ? '' : 'non-'}verbosely, ${options.data ? 'with' : 'without'} data, and with${options.checksum ? ' ' : 'out '}checksum(s).`)
+
+  const ops = {
+    checksum: options.checksum,
+    data: options.data,
+    depth: isNaN(tmp) ? 0 : tmp,
+    verbose: options.verbose
+  }
+
+  // console.info('parsed options: ', ops)
+
+  const snap = await entrySnapshot(target, ops, 0)
 
   return {
     stats: allStats,

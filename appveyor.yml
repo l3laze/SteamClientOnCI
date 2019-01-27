@@ -12,6 +12,7 @@ platform:
 #   https://help.github.com/articles/dealing-with-line-endings/
 init:
   - git config --global core.autocrlf input
+
 install:
   - ps: Install-Product node $env:nodejs_version $env:Platform
   - npm i -g npm
@@ -20,15 +21,14 @@ install:
   - ps: cmd /c start /wait msiexec.exe /i $env:temp\yarn-$env:yarn_version.msi /quiet
   - yarn --version
   - yarn
-  - cmd /c "install.bat"
+  - cmd /c "ci_install.bat"
         
  
 # Cache some dirs for faster build.
 cache:
   - "%LOCALAPPDATA%\\Yarn"
-  - "%TEMP%\\SteamSetup.exe"
   - "C:\\Program Files (x86)\\Steam"
- 
+
 # Quiet-ish build.
 build:
   verbosity: minimal
@@ -36,9 +36,12 @@ build:
  
 # Run build (tests)
 build_script:
-  - yarn lint && yarn test "C:\Program Files (x86)\Steam"
+  - yarn lint
+  - yarn test "C:\\Program Files (x86)\\Steam" false false false 5 "%systemdrive%\\users\\%username%\\Desktop"
+
+
 # Store snapshot
 artifacts:
-  - path: .\snapshot\snapshot.json
+  - path: "%systemdrive%/users/%username%/Desktop/snapshot.json"
     name: snapshot.json
     type: File

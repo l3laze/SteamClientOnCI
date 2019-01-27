@@ -9,7 +9,9 @@ os:
 osx_image: xcode8
 
 cache:
-  directories: ./snapshot
+  directories:
+    - ~/Library/Application\ Support/Steam
+    - ~/Desktop/snapshots
 
 script:
 # Linux
@@ -24,27 +26,19 @@ script:
 #
 # Mac
   - npm i -g npm
-#  - curl -o- -L https://yarnpkg.com/install.sh | bash
-#  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-#  - yarn --version
-  - curl -o ~/Desktop/Steam.dmg -L https://steamcdn-a.akamaihd.net/client/installer/steam.dmg
-  - yes | hdiutil attach ~/Desktop/Steam.dmg &> /dev/null
-  - cp -R /Volumes/Steam/Steam.app /Applications
-  - hdiutil unmount /Volumes/Steam
-  - /Applications/Steam.app/contents/MacOS/steam.sh -shutdown || echo "Exited with code $?"
-  - sleep 10
-  - sudo killall -9 steam || echo "Steam is not running"
-  - /Applications/Steam.app/contents/MacOS/steam.sh -shutdown || echo "Exited with code $?"
-  - sleep 10
-  - sudo killall -9 steam || echo "Steam is not running"
-  - /Applications/Steam.app/contents/MacOS/steam.sh -login $stu $stp -shutdown || echo "Exited with code $?"
-  - sleep 10
-  - sudo killall -9 steam || echo "Steam is not running"
-  - ls -a ~/Library/Application\ Support/Steam
-#  - yarn test ~/Library/Application\ Support/Steam
-  - node tests/test.js ~/Library/Application\ Support/Steam
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$PATH:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin"
+  - echo "travis_fold:start:ci_install"
+  - chmod u+x ./ci_install.sh
+  - ./ci_install.sh
+  - echo "travis_fold:end:ci_install"
+  - echo "travis_fold:start:snapshot"
+  - echo "Taking snapshot of Steam folder..."
+  - yarn test ~/Library/Application\ Support/Steam false false false 5 ~/Desktop/snapshots
+  - echo "travis_fold:end:snapshot"
 
 after_success:
+  - echo "Build finished successfully :-? Prove it.."
 
 notifications:
   email: false

@@ -25,6 +25,6 @@
   "scripts": {
     "lint": "yarn standard",
     "test": "node tests/test.js",
-    "test-snap": "node tests/test-snapshot.js"
+    "snap": "node tests/test.js"
   } 
 }
