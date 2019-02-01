@@ -37,11 +37,11 @@ build:
 # Run build (tests)
 build_script:
   - yarn lint
-  - yarn test "C:\\Program Files (x86)\\Steam" false false false 5 "%systemdrive%\\users\\%username%\\Desktop"
+  - yarn test "C:\\Program Files (x86)\\Steam" false false false false -1 ./
 
 
 # Store snapshot
 artifacts:
-  - path: "%systemdrive%/users/%username%/Desktop/snapshot.json"
+  - path: ./snapshot.json
     name: snapshot.json
     type: File

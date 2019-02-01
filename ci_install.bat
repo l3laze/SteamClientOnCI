@@ -26,10 +26,9 @@ taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
 
 echo "Updating"
 "C:\\Program Files (x86)\\Steam\\Steam.exe"
+timeout 9
 "C:\\Program Files (x86)\\Steam\\Steam.exe" "-shutdown"
-"C:\\Program Files (x86)\\Steam\\Steam.exe"
-"C:\\Program Files (x86)\\Steam\\Steam.exe" "-shutdown"
-timeout 10
+timeout 9
 taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
 
 :LOGIN
@@ -40,10 +39,10 @@ if exist "C:\\Program Files (x86)\\Steam\\config\\loginusers.vdf" (
 ) else (
   echo "Logging in"
   start "" "C:\\Program Files (x86)\\Steam\\Steam.exe" "%steamu%" "%steamp%"
-  timeout 30
+  timeout 27
   "C:\\Program Files (x86)\\Steam\\Steam.exe" -shutdown
   echo "Exiting.."
-  timeout 10
+  timeout 9
   taskkill.exe /F /T /IM Steam* || ( cmd /c "exit /b 0" )
 )
 

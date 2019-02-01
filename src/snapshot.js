@@ -56,36 +56,49 @@ async function fileSnapshot (file, opts) {
 }
 
 async function entrySnapshot (target, opts, currDepth) {
+  if (opts.blacklist.includes(basename(target))) {
+    console.info(`Skipping blacklisted item: ${target}`)
+    return {}
+  }
+
   if (opts.verbose === true) {
     console.info(`Adding ../${basename(dirname(target))}/${basename(target)} to snapshot.`)
   }
 
+  const sstats = await statObj(target)
+
   const snap = {
-    stats: await statObj(target),
     path: target
   }
 
-  allStats.size += snap.stats.size
+  snap.type = sstats.type
+  delete sstats.type
 
-  if (snap.stats.type === 'directory') {
+  allStats.size += sstats.size
+
+  if (snap.type === 'directory') {
     allStats.directories += 1
 
     if (opts.depth === -1 || currDepth < opts.depth) {
       // console.info('depth: ', opts.depth, currDepth)
 
       const entries = await afs.readdirAsync(target)
-      const locOps = opts
+      const locOps = Object.assign({}, opts)
 
       snap.children = []
       currDepth++
 
       for (let entry = 0; entry < entries.length; entry++) {
-        snap.children.push(await entrySnapshot(join(target, entries[ entry ]), locOps, currDepth))
+        entries[ entry ] = await entrySnapshot(join(target, entries[ entry ]), locOps, currDepth)
       }
 
       snap.children = entries
     }
-  } else if (snap.stats.type === 'file') {
+
+    if (opts.stats !== true) {
+      delete snap.stats
+    }
+  } else if (snap.type === 'file') {
     allStats.files += 1
     snap.data = await fileSnapshot(target, opts)
 
@@ -96,12 +109,22 @@ async function entrySnapshot (target, opts, currDepth) {
     } else {
       delete snap.data
     }
+
+    if (opts.checksum === true && snap.data.checksum !== '') {
+      snap.checksum = snap.data.checksum
+    } else {
+      delete snap.checksum
+    }
+
+    if (opts.stats === true) {
+      snap.stats = sstats
+    }
   }
 
   return snap
 }
 
-async function snapshot (dir, options = { checksum: false, data: false, depth: -1, verbose: false }) {
+async function snapshot (dir, options = { blacklist: [], checksum: false, data: false, depth: -1, stats: false, verbose: false, whitelist: [] }) {
   dir = resolve(dir)
   const stats = await afs.statAsync(dir)
   const isDir = stats.isDirectory()
@@ -112,12 +135,14 @@ async function snapshot (dir, options = { checksum: false, data: false, depth: -
   allStats.files = 0
   allStats.size = 0
 
-  console.info(`Creating snapshot of ${isDir ? 'directory' : 'file'} ${target} to a max depth of ${isNaN(tmp) ? 0 : tmp}, ${options.verbose ? '' : 'non-'}verbosely, ${options.data ? 'with' : 'without'} data, and with${options.checksum ? ' ' : 'out '}checksum(s).`)
+  console.info(`Creating snapshot of ${isDir ? 'directory' : 'file'} ${target} to a max depth of ${isNaN(tmp) ? 0 : tmp}, using blacklist ${options.blacklist} and whitelist ${whitelist}, ${options.verbose ? '' : 'non-'}verbosely, ${options.data ? 'with' : 'without'} data, and with${options.checksum ? ' ' : 'out '}checksum(s).`)
 
   const ops = {
+    blacklist: options.blacklist,
     checksum: options.checksum,
     data: options.data,
     depth: isNaN(tmp) ? 0 : tmp,
+    stats: options.stats,
     verbose: options.verbose
   }
 

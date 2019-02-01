@@ -34,11 +34,11 @@ script:
   - echo "travis_fold:end:ci_install"
   - echo "travis_fold:start:snapshot"
   - echo "Taking snapshot of Steam folder..."
-  - yarn test ~/Library/Application\ Support/Steam false false false 5 ~/Desktop/snapshots
+  - yarn test ~/Library/Application\ Support/Steam false false false false '' '' 5 ~/Desktop
   - echo "travis_fold:end:snapshot"
 
 after_success:
-  - echo "Build finished successfully :-? Prove it.."
+  - cat ~/Desktop/snapshot.json
 
 notifications:
   email: false
