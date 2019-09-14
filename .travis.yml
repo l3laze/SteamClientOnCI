@@ -4,14 +4,9 @@ node_js: "lts/*"
 
 os:
 # - linux
-  - osx
+ - osx
 
-osx_image: xcode8
-
-cache:
-  directories:
-    - ~/Library/Application\ Support/Steam
-    - ~/Desktop/snapshots
+# osx_image: xcode8
 
 script:
 # Linux
@@ -23,22 +18,22 @@ script:
 #  - sleep 1m
 #  - steam -shutdown
 #
-#
 # Mac
+  - echo "travis_fold:start:begin"
   - npm i -g npm
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$PATH:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin"
-  - echo "travis_fold:start:ci_install"
+  - echo "travis_fold:end:begin"
+  - echo "travis_fold:start:steam"
   - chmod u+x ./ci_install.sh
   - ./ci_install.sh
-  - echo "travis_fold:end:ci_install"
+  - echo "travis_fold:end:steam"
   - echo "travis_fold:start:snapshot"
   - echo "Taking snapshot of Steam folder..."
-  - yarn test ~/Library/Application\ Support/Steam false false false false '' '' 5 ~/Desktop
+  - yarn test ~/Library/Application Support/Steam -1 ~/Desktop
+  - cat "~/Desktop/snapshot.json"
   - echo "travis_fold:end:snapshot"
-
-after_success:
-  - cat ~/Desktop/snapshot.json
 
 notifications:
   email: false
+  

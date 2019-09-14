@@ -7,6 +7,7 @@ const { resolve, join } = require('path')
 
 (async function testSnapshot () {
   const dir = resolve(join(__dirname, '..', 'src'))
+  console.info(dir)
 
   // Made with help from https://regexr.com
   const regex = /.*src(?!.cache).*$/

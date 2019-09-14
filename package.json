@@ -24,7 +24,6 @@
   },
   "scripts": {
     "lint": "yarn standard",
-    "test": "node tests/test.js",
-    "snap": "node tests/test.js"
+    "test": "node tests/test.js"
   } 
 }
