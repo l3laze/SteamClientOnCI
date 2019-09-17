@@ -2,6 +2,7 @@
 
 const { basename, dirname, join, resolve } = require('path')
 const { promisify } = require('util')
+const crypto = require('crypto')
 const afs = {
   readdirAsync: promisify(require('fs').readdir),
   readFileAsync: promisify(require('fs').readFile),
@@ -18,8 +19,6 @@ const allStats = {
  */
 
 async function fileChecksum (str) {
-  const crypto = require('crypto')
-
   return crypto
     .createHash('md5')
     .update(str, 'utf8')
@@ -50,64 +49,74 @@ async function fileSnapshot (file, opts) {
   }
 
   if (opts.data) {
-    snap.data = data
+    snap.data = '' + data
   }
 
   return snap
 }
 
 async function entrySnapshot (target, opts, currDepth) {
-  const snap = {
-    path: opts.fullpath ? target : basename(target)
-  }
+  const snap = {}
+  let stype
+  const sstats = await statObj(target)
+  stype = sstats.type
 
   if (opts.quiet === false) {
-    console.info(`Adding ../${basename(dirname(target))}/${basename(target)} to snapshot.`)
+    console.info(`Adding ${stype} ../${basename(dirname(target))}/${basename(target)} to snapshot.`)
   }
 
-  const sstats = await statObj(target)
-
-  snap.type = sstats.type
-  delete sstats.type
+  if (opts.type === true) {
+    snap.type = sstats.type
+  }
 
   allStats.size += sstats.size
 
-  if (snap.type === 'directory') {
+  if (stype === 'directory') {
+    snap.path = opts.fullPath
+      ? `../${basename(dirname(target))}/${basename(target)}`
+      : basename(target)
     allStats.directories += 1
 
     if (opts.depth === -1 || currDepth < opts.depth) {
-      const entries = await afs.readdirAsync(target)
+      const entries = (await afs.readdirAsync(target)).filter((e) =>
+        (opts.include.indexOf(e) !== -1 ||
+        opts.include.indexOf(`${basename(dirname(target))}/${basename(target)}`) !== -1) &&
+        (opts.exclude.indexOf(e) === -1 &&
+        opts.exclude.indexOf(`${basename(dirname(target))}/${basename(target)}`) === -1))
+
+      // console.info(entries)
 
       for (let entry = 0; entry < entries.length; entry++) {
-          entries[ entry ] = await entrySnapshot(join(target, entries[ entry ]), opts, currDepth++)
-        }
+        entries[entry] = await entrySnapshot(join(target, entries[entry]), opts, currDepth++)
+      }
 
-        snap.contents = entries
+      snap.contents = entries
     }
-
-    if (opts.stats !== true) {
-      delete snap.stats
-    }
-  } else if (snap.type === 'file') {
+  } else if (stype === 'file') {
     allStats.files += 1
-    snap.data = await fileSnapshot(target, opts)
+    let fdata
 
-    snap.checksum = '' + snap.data.checksum
-
-    if (opts.data === true && typeof snap.data.data !== 'undefined') {
-      snap.data = snap.data.data
-    } else {
-      delete snap.data
+    if (opts.checksum === true) {
+      fdata = await fileSnapshot(target, opts)
+      snap.checksum = fdata.checksum
     }
 
-    if (opts.checksum === true && snap.data.checksum !== '') {
-      snap.checksum = snap.data.checksum
-    } else {
-      delete snap.checksum
+    if (opts.data === true) {
+      if (typeof fdata.data === 'undefined') {
+        fdata = await fileSnapshot(target, opts)
+      }
+
+      snap.data = fdata.data
     }
 
     if (opts.stats === true) {
       snap.stats = sstats
+    }
+
+    if (opts.fullPath) {
+      snap.path = opts.fullPath
+      ? `../${basename(dirname(target))}/${basename(target)}`
+      : basename(target)
     }
   }
 
@@ -115,8 +124,6 @@ async function entrySnapshot (target, opts, currDepth) {
 }
 
 async function snapshot (options) {
-  console.info(options)
-
   const dir = resolve(options.target)
   const stats = await afs.statAsync(dir)
   const isDir = stats.isDirectory()
@@ -132,13 +139,14 @@ async function snapshot (options) {
   allStats.size = 0
 
   if (options.quiet === false) {
-    console.info(`Creating snapshot of ${isDir ? 'directory' : 'file'} ${options.target} to a max depth of ${options.depth}, including pattern ${options.include} and excluding pattern ${options.exclude}, and ${options.quiet ? 'quietly' : 'verbosely'}, ${options.data ? 'with' : 'without'} data, and with${options.checksum ? ' ' : 'out '}checksum(s).`)
+    console.info(`Creating snapshot of ${isDir ? 'directory' : 'file'} ${options.target} to a max depth of ${options.depth}, including ${options.include.length} locations, and excluding ${options.exclude.length} locations; ${options.quiet ? 'quietly' : 'verbosely'}, ${options.data ? 'with' : 'without'} data, and with${options.checksum ? ' ' : 'out '}checksum(s).`)
   }
 
   const snap = await entrySnapshot(options.target, options, 0)
 
   return {
-    data: snap,
+    root: dirname(options.target),
+    filesystem: snap,
     stats: allStats
   }
 }

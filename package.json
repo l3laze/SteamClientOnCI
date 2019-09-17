@@ -17,13 +17,11 @@
     "url": "https://github.com/l3laze/SteamClientData/issues"
   },
   "devDependencies": {
-    "standard": "^11.0.1"
+    "standard": "^14.3.0"
   },
-  "dependencies": {
-    "node-fetch": "^2.1.2"
-  },
+  "dependencies": {},
   "scripts": {
     "lint": "yarn standard",
-    "test": "node tests/test.js"
-  } 
+    "test": "node cli.js --target ./"
+  }
 }

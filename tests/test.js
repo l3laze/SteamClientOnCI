@@ -8,19 +8,11 @@ const { join } = require('path')
 
 (async function run () {
   try {
-     const target = process.argv[ 2 ] || './'
-    
-    /*
-      const verbose = /true/.test(process.argv[ 3 ])
-      const includeData = /true/.test(process.argv[ 4 ])
-      const checksum = /true/.test(process.argv[ 5 ])
-      const stats = /true/.test(process.argv[ 6 ])
-      const blacklist = process.argv[ 7 ] || []
-    */
+    const target = process.argv[ 2 ] || './'
     const depth = parseInt(process.argv[ 3 ]) || -1
     const outPath = process.argv[ 4 ] || './'
 
-    const options = { target,  depth, blacklist: [], checksum: false, data: false, stats: false }
+    const options = { target,  depth, checksum: false, data: false, stats: false }
     
     console.info(options)
 

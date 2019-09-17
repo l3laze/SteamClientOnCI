@@ -2,37 +2,17 @@ language: node_js
 
 node_js: "lts/*"
 
-os:
-# - linux
- - osx
-
-# osx_image: xcode8
+os: osx
 
 script:
-# Linux
-#  - sudo dpkg --add-architecture i386
-#  - sudo apt update
-#  - curl -o steam.deb -L http://steamcdn-a.akamaihd.net/client/installer/steam.deb
-#  - sudo apt -y install ./steam.deb
-#  - xvfb-run --server-args="-screen 0 1024x768x24" steam &
-#  - sleep 1m
-#  - steam -shutdown
-#
-# Mac
-  - echo "travis_fold:start:begin"
   - npm i -g npm
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$PATH:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin"
-  - echo "travis_fold:end:begin"
-  - echo "travis_fold:start:steam"
   - chmod u+x ./ci_install.sh
   - ./ci_install.sh
-  - echo "travis_fold:end:steam"
-  - echo "travis_fold:start:snapshot"
   - echo "Taking snapshot of Steam folder..."
-  - yarn test ~/Library/Application Support/Steam -1 ~/Desktop
-  - cat "~/Desktop/snapshot.json"
-  - echo "travis_fold:end:snapshot"
+  - node ./src/cli.js -kqs -t ~/Library/Application\ Support/Steam -i 'Steam/registry.vdf' -i 'appcache/appinfo.vdf' -i 'appcache/packageinfo.vdf' -i 'config/config.vdf' -i 'loginusers.vdf' -i 'steamapps/libraryfolders.vdf' > ~/Desktop/snapshot.json
+  - cat ~/Desktop/snapshot.json
 
 notifications:
   email: false

@@ -1,18 +1,14 @@
 'use strict'
 
-function getArg(type, val, def) {
+function getArg (type, val, def) {
   type = type.toLowerCase()
 
-  if (typeof val === type || (typeof val === 'string' && type === 'path')) {
+
+  // eslint-disable-next-line valid-typeof
+  if (typeof val === '' + type || (typeof val === 'string' && type === 'path')) {
     return val
   } else if (type === 'boolean') {
     return /true/.test(val)
-  } else if (type === 'regex') {
-    try {
-      return new RegExp(val)
-    } catch (err) {
-      throw new Error('Invalid pattern: ' + val)
-    }
   } else if (type === 'number') {
     if (val !== 'undefined' && typeof val !== 'undefined') {
       val = parseInt(val)
@@ -21,63 +17,84 @@ function getArg(type, val, def) {
       }
       return val
     }
+  } else if (type === 'multiple') {
+    val = [ val ]
   }
 
   return def
 }
 
 function parse (args, options) {
-  const longKeys = {} 
+  const longKeys = {}
   const shortKeys = {}
   const parsed = {}
   let i = 0
   let op = ''
+  let val
 
   Object.keys(options).forEach((k) => {
-    longKeys[ k ] = options[ k ][ 0 ]
-    shortKeys[options[ k ][ 0 ]] = k
+    longKeys[k] = options[k][0]
+    shortKeys[options[k][0]] = k
   })
 
-  for(i = 0; i < args.length; i++) {
-    op = args[ i ].replace(/^\-{1,2}/, '')
+  for (i = 0; i < args.length; i++) {
+    op = args[i].replace(/^-{1,2}/, '')
 
-    if (/^\-(?!\-)/.test(args[ i ]) && (typeof shortKeys[ op ] === 'undefined' && typeof longKeys[ op ] === 'undefined')) {
+    if (/^-(?!-)/.test(args[i]) && (typeof shortKeys[op] === 'undefined' && typeof longKeys[op] === 'undefined')) {
       const flags = op.split('')
 
       for (let f = 0; f < flags.length; f++) {
-        if (typeof shortKeys[flags[ f ]] !== 'undefined') {
+        if (typeof shortKeys[flags[f]] !== 'undefined') {
           // console.info('Found short flag: ' + flags[ f ])
-          parsed[shortKeys[flags[ f ]]] = true
+          parsed[shortKeys[flags[f]]] = true
         } else {
-          throw new Error('Unknown or misnamed flag, or combination of flags: "' + flags[ f ] + '".')
+          throw new Error('Unknown or misnamed flag, or combination of flags: "' + flags[f] + '".')
         }
       }
     } else {
-      if (typeof longKeys[ op ] !== 'undefined') {
+      if (typeof longKeys[op] !== 'undefined') {
         // console.info('Found long option: ' + op)
-        parsed[ op ] = (options[ op ][ 1 ] === 'flag'
-          ? true
-          : getArg(options[ op ][ 1 ], args[ ++i ], options[ op ][ 3 ]))
-      } else if (typeof shortKeys[ op ] !== 'undefined') {
+        if (options[op][1] === 'flag') {
+          parsed[op] = true
+        } else if (/multiple/.test(options[op][1]) === false) {
+          parsed[op]  = getArg(options[op][1], args[++i], options[op][3])
+        } else {
+          if (typeof parsed[op] === 'undefined') {
+            parsed[op] = []
+          }
+
+          val = getArg(options[op][1].split('/')[1], args[++i], options[op][3])
+          parsed[op].push(val)
+        }
+      } else if (typeof shortKeys[op] !== 'undefined') {
         // console.info('Found short option: ' + op)
-        parsed[shortKeys[ op ]] = (options[shortKeys[ op ]][ 1 ] === 'flag'
-          ? true
-          : getArg(options[shortKeys[ op ]][ 1 ], args[ ++i ], options[shortKeys[ op ]][ 3 ]))
+        if (options[shortKeys[op]][1] === 'flag') {
+          parsed[shortKeys[op]] = true
+        } else if (/multiple/.test(options[shortKeys[op]][1]) === false) {
+          parsed[shortKeys[op]]  = getArg(options[shortKeys[op]][1], args[++i], options[shortKeys[op]][3])
+        } else {
+          if (typeof parsed[shortKeys[op]] === 'undefined') {
+            parsed[shortKeys[op]] = []
+          }
+
+          val = getArg(options[shortKeys[op]][1].split('/')[1], args[++i], options[shortKeys[op]][3])
+          parsed[shortKeys[op]].push(val)
+        }
       } else {
         throw new Error('Unknown option: "' + op + '".')
       }
     }
   }
 
-  let keys = Object.keys(longKeys)
+  const keys = Object.keys(longKeys)
 
   for (i = 0; i < keys.length; i++) {
-    if (typeof parsed[keys[ i ]] === 'undefined') {
+    if (typeof parsed[keys[i]] === 'undefined') {
       // console.info('Found undefined option: ' + keys[ i ])
-  
-      options[keys [ i ]][ 1 ] === 'flag'
-        ?  parsed[keys[ i ]]  = false
-        : parsed[keys[ i ]] = options[keys[ i ]][ 3 ]
+
+      options[keys[i]][1] === 'flag'
+        ? parsed[keys[i]] = false
+        : parsed[keys[i]] = options[keys[i]][3]
     }
   }
 
@@ -85,7 +102,19 @@ function parse (args, options) {
 }
 
 function usage (options) {
-  return '# Usage\n  ' +  (options.name || process.argv[1]) + Object.keys(options).map((o) => '\n-' + options[ o ][ 0 ] + ' | -' + o + (' '.repeat(8 - o.length)) + ' - ' + options[ o ][ 4 ]).join('')
+  let pad = 0
+
+  return '# Usage\n ' +
+    (options.name || process.argv[1]) +
+    Object.keys(options).map((o) => {
+      pad = 12 - o.length
+      return '\n-' +
+      options[o][0] +
+      ' | -' + o +
+      (' '.repeat(pad > 0 ? pad : 1)) +
+      ' - ' +
+      options[o][4]
+    }).join('')
 }
 
 module.exports = {
