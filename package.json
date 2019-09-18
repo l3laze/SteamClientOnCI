@@ -5,9 +5,11 @@
   "homepage": "https://github.com/l3laze/SteamClientData#readme",
   "author": "Tom Shaver <l3l_aze@yahoo.com>",
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "src/snapshot.js",
   "files": [
-    "src/index.js"
+    "src/snapshot.js",
+    "src/cli.js",
+    "src/commandparser.js"
   ],
   "repository": {
     "type": "git",
@@ -22,6 +24,6 @@
   "dependencies": {},
   "scripts": {
     "lint": "yarn standard",
-    "test": "node cli.js --target ./"
+    "test": "node ./src/cli.js -cklqrsy -e node_modules -e yarn.lock -e yarn-error.log -e .git"
   }
 }

@@ -4,18 +4,18 @@ const { snapshot } = require('./../src/snapshot.js')
 const { parse, usage } = require('./../src/commandparser.js')
 
 ;
-
 (async function run () {
   const options = {
     target: ['t', 'path', false, './', 'Path to take snapshot of.'],
-    depth: ['d', 'number', false, -1, 'Recursive depth; default=-1=infinite.'],
-    quiet: ['q', 'flag', false, false, 'Just shut up and do it.'],
-    include: ['i', 'multiple/string', false, [], 'Item to include; name or path.'],
+    depth: ['d', 'number', false, -1, 'default=-1=infinite.'],
     exclude: ['e', 'multiple/string', false, [], 'Item to exclude; name or path.'],
+    quiet: ['q', 'flag', false, false, 'Quiet mode.'],
     checksum: ['k', 'flag', false, false, 'Checksum each file.'],
-    data: ['a', 'flag', false, false, 'Include file data in snapshot.'],
-    stats: ['s', 'flag', false, false, 'Include filesystem stats.'],
-    fullPath: ['f', 'flag', false, false, 'Include full path.'],
+    recursive: ['r', 'flag', false, false, 'Recursive mode.'],
+    contents: ['c', 'flag', false, false, 'Include file data in snapshot.'],
+    stats: ['s', 'flag', false, false, 'Include all filesystem stats.'],
+    millisecond: ['l', 'flag', false, false, 'Use ms timestamps for stats.'],
+    absolute: ['a', 'flag', false, false, 'Include absolute paths.'],
     type: ['y', 'flag', false, false, 'Include type (file/folder).'],
     help: ['h', 'flag', false, '', 'View this message.']
   }

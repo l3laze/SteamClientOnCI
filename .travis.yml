@@ -11,7 +11,7 @@ script:
   - chmod u+x ./ci_install.sh
   - ./ci_install.sh
   - echo "Taking snapshot of Steam folder..."
-  - node ./src/cli.js -kqs -t ~/Library/Application\ Support/Steam -i 'Steam/registry.vdf' -i 'appcache/appinfo.vdf' -i 'appcache/packageinfo.vdf' -i 'config/config.vdf' -i 'loginusers.vdf' -i 'steamapps/libraryfolders.vdf' > ~/Desktop/snapshot.json
+  - node ./src/cli.js -kqs -t ~/Library/Application\ Support/Steam -e Steam.AppBundle -e logs -e music -e htmlcache -e widevine > ~/Desktop/snapshot.json
   - cat ~/Desktop/snapshot.json
 
 notifications:
