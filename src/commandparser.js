@@ -3,7 +3,6 @@
 function getArg (type, val, def) {
   type = type.toLowerCase()
 
-
   // eslint-disable-next-line valid-typeof
   if (typeof val === '' + type || (typeof val === 'string' && type === 'path')) {
     return val
@@ -18,7 +17,7 @@ function getArg (type, val, def) {
       return val
     }
   } else if (type === 'multiple') {
-    val = [ val ]
+    val = [val]
   }
 
   return def
@@ -57,7 +56,7 @@ function parse (args, options) {
         if (options[op][1] === 'flag') {
           parsed[op] = true
         } else if (/multiple/.test(options[op][1]) === false) {
-          parsed[op]  = getArg(options[op][1], args[++i], options[op][3])
+          parsed[op] = getArg(options[op][1], args[++i], options[op][3])
         } else {
           if (typeof parsed[op] === 'undefined') {
             parsed[op] = []
@@ -71,7 +70,7 @@ function parse (args, options) {
         if (options[shortKeys[op]][1] === 'flag') {
           parsed[shortKeys[op]] = true
         } else if (/multiple/.test(options[shortKeys[op]][1]) === false) {
-          parsed[shortKeys[op]]  = getArg(options[shortKeys[op]][1], args[++i], options[shortKeys[op]][3])
+          parsed[shortKeys[op]] = getArg(options[shortKeys[op]][1], args[++i], options[shortKeys[op]][3])
         } else {
           if (typeof parsed[shortKeys[op]] === 'undefined') {
             parsed[shortKeys[op]] = []

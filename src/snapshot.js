@@ -67,9 +67,8 @@ async function fileSnapshot (file, opts) {
 
 async function entrySnapshot (target, opts, currDepth) {
   const snap = {}
-  let stype
   const sstats = await statObj(target, opts.millisecond)
-  stype = sstats.type
+  const stype = sstats.type
   delete sstats.type
 
   if (opts.quiet === false) {
@@ -93,8 +92,6 @@ async function entrySnapshot (target, opts, currDepth) {
 
     if (opts.recursive && (opts.depth === -1 || currDepth <= opts.depth) && opts.exclude.indexOf(basename(target)) === -1) {
       const entries = (await afs.readdirAsync(target)).filter((e) =>
-        /*((opts.include.indexOf(e) !== -1 ||
-        opts.include.indexOf(`${basename(dirname(target))}/${basename(target)}`) !== -1))) || */
         (opts.recursive &&
           (opts.depth === -1 || currDepth <= opts.depth) &&
           opts.exclude.indexOf(e) === -1 &&
