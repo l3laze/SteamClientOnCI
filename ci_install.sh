@@ -2,7 +2,7 @@
 case "$OSTYPE" in
 darwin* )
   echo "Downloading and installing Steam for macOS..."
-  curl -o Steam.dmg -L https://steamcdn-a.akamaihd.net/client/installer/steam.dmg
+  curl -o Steam.dmg -L https://cdn.cloudflare.steamstatic.com/client/installer/steam.dmg
   yes | hdiutil attach Steam.dmg > /dev/null
   cp -Rf /Volumes/Steam/Steam.app /Applications
   hdiutil unmount /Volumes/Steam
@@ -12,7 +12,7 @@ darwin* )
   do
     tries=$((tries + 1))
     /Applications/Steam.app/contents/MacOS/steam.sh -login "$stu" "$stp"
-    sleep 25 > /dev/null
+    sleep 45 > /dev/null
     /Applications/Steam.app/contents/MacOS/steam.sh -shutdown
     sleep 15 > /dev/null
     sudo killall -9 steam || echo "Steam is not running"

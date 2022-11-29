@@ -12,11 +12,11 @@ on:
 jobs:
   build:
 
-    runs-on: macos-12
+    runs-on: macos-10.15 # 10.15, 12
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -26,6 +26,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+      env:
+        stu: ${{secrets.STU}}
+        stp: ${{secrets.STP}}
     - run: ls -ah
     - run: chmod u+x ./ci_install.sh
     - run: ./ci_install.sh
